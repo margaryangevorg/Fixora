@@ -1,0 +1,6 @@
+@Fixora_HostAddress = http://localhost:5194
+
+GET {{Fixora_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

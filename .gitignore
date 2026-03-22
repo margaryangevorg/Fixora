@@ -1,0 +1,23 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+*.user
+
+## Visual Studio
+.vs/
+*.suo
+*.rsuser
+
+## Rider
+.idea/
+
+## Logs
+*.log
+
+## Environment / secrets
+appsettings.Development.json
+*.env
+
+## NuGet
+*.nupkg
+packages/
