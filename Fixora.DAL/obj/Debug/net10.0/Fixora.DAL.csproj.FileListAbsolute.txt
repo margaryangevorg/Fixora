@@ -1,0 +1,14 @@
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.csproj.AssemblyReference.cache
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.AssemblyInfoInputs.cache
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.AssemblyInfo.cs
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.csproj.CoreCompileInputs.cache
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\bin\Debug\net10.0\Fixora.DAL.deps.json
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\bin\Debug\net10.0\Fixora.DAL.runtimeconfig.json
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\bin\Debug\net10.0\Fixora.DAL.dll
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\bin\Debug\net10.0\Fixora.DAL.pdb
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.dll
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\refint\Fixora.DAL.dll
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.pdb
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\Fixora.DAL.genruntimeconfig.cache
+C:\Users\Gev\source\repos\Fixora\Fixora.DAL\obj\Debug\net10.0\ref\Fixora.DAL.dll

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Fixora.DAL/Fixora.DAL.csproj" Id="41433ae1-40ac-40ca-9eb3-d4d488f37f67" />
+  <Project Path="Fixora/Fixora.API.csproj" />
+</Solution>
