@@ -1,10 +1,8 @@
-﻿using Fixora.API.Models.BuildingModels;
+using Fixora.API.Models.BuildingModels;
+using Fixora.API.Services.Interfaces;
 using Fixora.DAL.Constants;
-using Fixora.DAL.Entities;
-using Fixora.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 
 namespace Fixora.API.Controllers;
 
@@ -13,86 +11,41 @@ namespace Fixora.API.Controllers;
 [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
 public class BuildingController : ControllerBase
 {
-    private readonly IBuildingRepository _buildingRepository;
+    private readonly IBuildingService _buildingService;
 
-    public BuildingController(IBuildingRepository buildingRepository)
+    public BuildingController(IBuildingService buildingService)
     {
-        _buildingRepository = buildingRepository;
+        _buildingService = buildingService;
     }
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
-        var buildings = await _buildingRepository.GetAllAsync();
-
-        var response = buildings.Select(b => new BuildingResponse
-        {
-            Id = b.Id,
-            Name = b.Name,
-            Address = b.Address,
-            ElevatorCount = b.Elevators.Count
-        });
-
-        return Ok(response);
+        return Ok(await _buildingService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var building = await _buildingRepository.GetWithElevatorsAsync(id);
-        if (building is null)
-            return NotFound($"Building {id} not found.");
-
-        return Ok(new BuildingWithElevatorsResponse
-        {
-            Id = building.Id,
-            Name = building.Name,
-            Address = building.Address,
-            Elevators = building.Elevators.Select(el => new ElevatorSummary
-            {
-                Id = el.Id,
-                Label = el.Label,
-                SerialNumber = el.SerialNumber
-            }).ToList()
-        });
+        var result = await _buildingService.GetByIdAsync(id);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
+        return Ok(result.Data);
     }
 
     [HttpPost]
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Create([FromBody] BuildingRequest request)
     {
-        var building = new Building
-        {
-            Name = request.Name,
-            Address = request.Address
-        };
-
-        await _buildingRepository.AddAsync(building);
-        await _buildingRepository.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = building.Id }, new BuildingResponse
-        {
-            Id = building.Id,
-            Name = building.Name,
-            Address = building.Address,
-            ElevatorCount = 0
-        });
+        var response = await _buildingService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Update(int id, [FromBody] BuildingRequest request)
     {
-        var building = await _buildingRepository.GetByIdAsync(id);
-        if (building is null)
-            return NotFound($"Building {id} not found.");
-
-        building.Name = request.Name;
-        building.Address = request.Address;
-
-        _buildingRepository.Update(building);
-        await _buildingRepository.SaveChangesAsync();
-
+        var result = await _buildingService.UpdateAsync(id, request);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
         return NoContent();
     }
 
@@ -100,13 +53,8 @@ public class BuildingController : ControllerBase
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
-        var building = await _buildingRepository.GetByIdAsync(id);
-        if (building is null)
-            return NotFound($"Building {id} not found.");
-
-        _buildingRepository.Delete(building);
-        await _buildingRepository.SaveChangesAsync();
-
+        var result = await _buildingService.DeleteAsync(id);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
         return NoContent();
     }
 }

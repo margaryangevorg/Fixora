@@ -1,11 +1,8 @@
-﻿using Fixora.API.Models.ElevatorModels;
-using Fixora.API.Models.InputModels;
+using Fixora.API.Models.ElevatorModels;
+using Fixora.API.Services.Interfaces;
 using Fixora.DAL.Constants;
-using Fixora.DAL.Entities;
-using Fixora.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 
 namespace Fixora.Controllers;
 
@@ -14,99 +11,43 @@ namespace Fixora.Controllers;
 [Authorize]
 public class ElevatorController : ControllerBase
 {
-    private readonly IRepository<Elevator> _elevatorRepository;
-    private readonly IBuildingRepository _buildingRepository;
+    private readonly IElevatorService _elevatorService;
 
-    public ElevatorController(
-        IRepository<Elevator> elevatorRepository,
-        IBuildingRepository buildingRepository)
+    public ElevatorController(IElevatorService elevatorService)
     {
-        _elevatorRepository = elevatorRepository;
-        _buildingRepository = buildingRepository;
+        _elevatorService = elevatorService;
     }
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
-        var elevators = await _elevatorRepository.GetAllAsync();
-
-        var response = elevators.Select(el => new ElevatorResponse
-        {
-            Id = el.Id,
-            Label = el.Label,
-            SerialNumber = el.SerialNumber,
-            BuildingId = el.BuildingId,
-            BuildingName = el.Building?.Name ?? string.Empty
-        });
-
-        return Ok(response);
+        return Ok(await _elevatorService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var elevator = await _elevatorRepository.GetByIdAsync(id);
-        if (elevator is null)
-            return NotFound($"Elevator {id} not found.");
-
-        return Ok(new ElevatorResponse
-        {
-            Id = elevator.Id,
-            Label = elevator.Label,
-            SerialNumber = elevator.SerialNumber,
-            BuildingId = elevator.BuildingId,
-            BuildingName = elevator.Building?.Name ?? string.Empty
-        });
+        var result = await _elevatorService.GetByIdAsync(id);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
+        return Ok(result.Data);
     }
 
     [HttpPost]
     [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
     public async Task<IActionResult> Create([FromBody] ElevatorRequest request)
     {
-        // Verify the building exists before creating the elevator
-        var building = await _buildingRepository.GetByIdAsync(request.BuildingId);
-        if (building is null)
-            return BadRequest($"Building {request.BuildingId} not found.");
-
-        var elevator = new Elevator
-        {
-            Label = request.Label,
-            SerialNumber = request.SerialNumber,
-            BuildingId = request.BuildingId
-        };
-
-        await _elevatorRepository.AddAsync(elevator);
-        await _elevatorRepository.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = elevator.Id }, new ElevatorResponse
-        {
-            Id = elevator.Id,
-            Label = elevator.Label,
-            SerialNumber = elevator.SerialNumber,
-            BuildingId = elevator.BuildingId,
-            BuildingName = building.Name
-        });
+        var result = await _elevatorService.CreateAsync(request);
+        if (!result.IsSuccess) return BadRequest(result.ErrorMessage);
+        return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
     public async Task<IActionResult> Update(int id, [FromBody] ElevatorRequest request)
     {
-        var elevator = await _elevatorRepository.GetByIdAsync(id);
-        if (elevator is null)
-            return NotFound($"Elevator {id} not found.");
-
-        var building = await _buildingRepository.GetByIdAsync(request.BuildingId);
-        if (building is null)
-            return BadRequest($"Building {request.BuildingId} not found.");
-
-        elevator.Label = request.Label;
-        elevator.SerialNumber = request.SerialNumber;
-        elevator.BuildingId = request.BuildingId;
-
-        _elevatorRepository.Update(elevator);
-        await _elevatorRepository.SaveChangesAsync();
-
+        var result = await _elevatorService.UpdateAsync(id, request);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
+        if (!result.IsSuccess) return BadRequest(result.ErrorMessage);
         return NoContent();
     }
 
@@ -114,13 +55,8 @@ public class ElevatorController : ControllerBase
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
-        var elevator = await _elevatorRepository.GetByIdAsync(id);
-        if (elevator is null)
-            return NotFound($"Elevator {id} not found.");
-
-        _elevatorRepository.Delete(elevator);
-        await _elevatorRepository.SaveChangesAsync();
-
+        var result = await _elevatorService.DeleteAsync(id);
+        if (result.IsNotFound) return NotFound(result.ErrorMessage);
         return NoContent();
     }
 }

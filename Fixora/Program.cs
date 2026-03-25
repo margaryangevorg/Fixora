@@ -83,6 +83,10 @@ builder.Services.AddScoped<IMaintenanceOrderRepository, MaintenanceOrderReposito
 
 // Services
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBuildingService, BuildingService>();
+builder.Services.AddScoped<IElevatorService, ElevatorService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 
 var app = builder.Build();
 
